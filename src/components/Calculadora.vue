@@ -332,7 +332,7 @@ export default {
   background: white;
   background:#2cb5e8;
   font-size: 16px;
-  height: 154px;
+  height: 174px;
   border:0;
   margin:0;
   padding:10px;
