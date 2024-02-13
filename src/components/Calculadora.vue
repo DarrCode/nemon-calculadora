@@ -37,8 +37,9 @@
             <v-text-field
               v-model="operands1"
               @input="validarInput"
+              @click="inputClicked(1)"
               class="operands"
-              :class="errorInput1 ? 'error-input' : ''"
+              ref="operands1"
               hide-details
               solo
               dense
@@ -55,8 +56,9 @@
             <v-text-field
               v-model="operands2"
               @input="validarInput"
+              @click="inputClicked(2)"
               class="operands"
-              :class="errorInput2 ? 'error-input' : ''"
+              ref="operands2"
               hide-details
               solo
               dense
@@ -73,6 +75,7 @@
             <v-text-field
               v-model="operands3"
               @input="validarInput"
+              @click="inputClicked(3)"
               class="operands"
               hide-details
               dense
@@ -86,15 +89,20 @@
               <h3>= {{ result }}</h3>
               <h5 v-if="madeBy">{{ madeBy }}</h5>
             </v-col>
-            <v-col v-if="!result && required" class="p-0" cols="11">
+            <v-col v-if="!inputName && !result && required" class="p-0" cols="11">
               <small class="color-danger">Este campo es requerido.</small>
             </v-col>
           </v-row>
         </v-container>
         <div v-else>
-          <v-btn @click="showHistory = false" small>
+          <v-btn
+            class="btn-back"
+            @click="showHistory = false"
+            small
+          >
             Volver
           </v-btn>
+          <br>
           <div v-if="history">
             <h3>Historial de operaciones</h3>
             <div class="flex flex-column" v-for="(item, index) in history" :key="index">
@@ -115,22 +123,22 @@
         <button class="button" @click="clearAll">
           <v-icon class="clear">mdi-trash-can-outline</v-icon>
         </button>
-        <button class="button" value="%">%</button>
-        <button class="button" value="/">/</button><br>
-        <button class="button" value="7">7</button>
-        <button class="button" value="8">8</button>
-        <button class="button" value="9">9</button>
-        <button class="button" value="*">*</button><br>
-        <button class="button" value="4">4</button>
-        <button class="button" value="5">5</button>
-        <button class="button" value="6">6</button>
-        <button class="button" value="-">-</button><br>
-        <button class="button" value="1">1</button>
-        <button class="button" value="2">2</button>
-        <button class="button" value="3">3</button>
-        <button class="button" value="+">+</button><br>
-        <button class="button" value=".">.</button>
-        <button class="button" value="0">0</button>
+        <button class="button">%</button>
+        <button class="button">/</button><br>
+        <button class="button" @click="numberSelected(7)">7</button>
+        <button class="button" @click="numberSelected(8)">8</button>
+        <button class="button" @click="numberSelected(9)">9</button>
+        <button class="button">*</button><br>
+        <button class="button" @click="numberSelected(4)">4</button>
+        <button class="button" @click="numberSelected(5)">5</button>
+        <button class="button" @click="numberSelected(6)">6</button>
+        <button class="button">-</button><br>
+        <button class="button" @click="numberSelected(1)">1</button>
+        <button class="button" @click="numberSelected(2)">2</button>
+        <button class="button" @click="numberSelected(3)">3</button>
+        <button class="button">+</button><br>
+        <button class="button" @click="numberSelected('.')">.</button>
+        <button class="button" @click="numberSelected(0)">0</button>
         <button class="button result" @click="operation">=</button>
       </div>
     </div>
@@ -161,19 +169,18 @@ export default {
       history: [],
       showHistory: false,
       historyExist: null,
-      madeBy: ''
+      madeBy: '',
+
+      clickedInput: null
     }
   },
   mounted() {
-    window.addEventListener('beforeunload', this.clearLocalStorage)
+    window.addEventListener('beforeunload', localStorage.clear())
   },
   beforeDestroy() {
-    window.removeEventListener('beforeunload', this.clearLocalStorage)
+    window.removeEventListener('beforeunload', localStorage.clear())
   },
   methods: {
-    clearLocalStorage() {
-      localStorage.clear()
-    },
     clearName(){
       this.inputName = true
       this.showResult = false
@@ -188,23 +195,40 @@ export default {
         this.inputName = false
       }
     },
+    inputClicked(inputNumber) {
+      this.clickedInput = inputNumber
+    },
+    numberSelected(selected) {
+      if (this.clickedInput == 1) {
+        this.operands1 += selected
+      } else if (this.clickedInput == 2) {
+        this.operands2 += selected
+      } else if (this.clickedInput == 3) {
+        this.operands3 += selected
+      }
+    },
     operation () {
       if (this.operands1 == '') {
         this.required = true
-        this.errorInput1 = true
+        this.$nextTick(() => {
+          this.$refs['operands1'].$el.querySelector('#input-7').focus();
+        });
+
         return false
       }
 
       if (this.operands2 == '') {
         this.required = true
-        this.errorInput2 = true
+        this.$nextTick(() => {
+          this.$refs['operands2'].$el.querySelector('#input-8').focus();
+        });
+
         return false
       }
 
       if (isNaN(this.operands1) || isNaN(this.operands2) || isNaN(this.operands3)) {
         this.showResult = true
         this.result = this.operands1 + this.operands2 + this.operands3
-
       } else {
         let expression = this.operands1 + this.operator1 + this.operands2
 
@@ -348,7 +372,6 @@ export default {
   color: rgb(255, 255, 255)!important;
 }
 
-
 .history {
   color: #FFA726!important;
 }
@@ -391,5 +414,9 @@ export default {
 }
 .button:active{
   transform: scale(1);
+}
+
+.v-text-field.v-text-field--enclosed:not(.v-text-field--rounded)>.v-input__control>.v-input__slot {
+  padding: 0 10px!important;
 }
 </style>
