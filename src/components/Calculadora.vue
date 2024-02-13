@@ -307,6 +307,7 @@ export default {
       this.operands3 = ''
       this.showResult = false
       this.result = false
+      this.required = false
     }
   }
 }
