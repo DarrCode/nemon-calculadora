@@ -268,7 +268,11 @@ export default {
       this.findOperation(currentOp)
 
       if (this.sameUser) {
-        this.historyExist[0].operations.push(currentOp.operations[0])
+        this.historyExist.forEach((item, index) => {
+          if (index === this.historyExist.length - 1) {
+            item.operations.push(currentOp.operations[0]);
+          }
+        })
       } else {
         this.historyExist.push(currentOp)
       }
