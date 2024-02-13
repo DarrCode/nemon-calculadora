@@ -251,7 +251,7 @@ export default {
       let history = [{
         user: this.name,
         operations: [{
-          expression: XPathExpression,
+          expression: expression,
           result: this.result
         }]
       }]
