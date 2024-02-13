@@ -88,7 +88,7 @@
           <v-row>
             <v-col v-if="!inputName && showResult" class="p-0" cols="11">
               <h3>= {{ result }}</h3>
-              <h5 v-if="madeBy">{{ madeBy }}</h5>
+              <h5 class="madeBy" v-if="madeBy">{{ madeBy }}</h5>
             </v-col>
             <v-col v-if="!inputName && !result && required" class="p-0" cols="11">
               <small class="color-danger">
@@ -363,15 +363,6 @@ export default {
   min-width: 39px!important;
 }
 
-.v-list-item, .v-list-item__subtitle {
-  color: #fff!important;
-  font-size: 20px!important;
-
-}
-
-.v-list-item__subtitle {
-  margin-left: 10px!important;
-}
 
 .clear {
   color: rgb(255, 255, 255)!important;
@@ -426,5 +417,9 @@ export default {
 
 .v-text-field.v-text-field--enclosed:not(.v-text-field--rounded)>.v-input__control>.v-input__slot {
   padding: 0 10px!important;
+}
+
+.madeBy {
+  font-size: 15px;
 }
 </style>
