@@ -1,6 +1,6 @@
 <template>
   <div id="principal">
-    <div id= "calculadora">
+    <div id="calculadora">
       <div class="pantalla" :class="{pantallaHistory: showHistory}">
         <v-row v-if="!showHistory && inputName">
           <v-col cols="9">
@@ -15,9 +15,7 @@
           </v-col>
           <v-col cols="3">
             <v-btn @click="saveName">
-              <v-icon>
-                mdi-arrow-right-circle-outline
-              </v-icon>
+              <v-icon> mdi-arrow-right-circle-outline</v-icon>
             </v-btn>
           </v-col>
         </v-row>
@@ -36,11 +34,13 @@
           <v-col cols="3">
             <v-text-field
               v-model="operands1"
-              @input="validarInput"
               @click="inputClicked(1)"
               class="operands"
               ref="operands1"
+              maxlength="3"
+              id="operands1"
               hide-details
+              autofocus
               solo
               dense
             ></v-text-field>
@@ -55,10 +55,11 @@
           <v-col cols="3">
             <v-text-field
               v-model="operands2"
-              @input="validarInput"
               @click="inputClicked(2)"
               class="operands"
+              maxlength="3"
               ref="operands2"
+              id="operands2"
               hide-details
               solo
               dense
@@ -74,9 +75,9 @@
           <v-col cols="4">
             <v-text-field
               v-model="operands3"
-              @input="validarInput"
               @click="inputClicked(3)"
               class="operands"
+              maxlength="3"
               hide-details
               dense
               solo
@@ -90,7 +91,9 @@
               <h5 v-if="madeBy">{{ madeBy }}</h5>
             </v-col>
             <v-col v-if="!inputName && !result && required" class="p-0" cols="11">
-              <small class="color-danger">Este campo es requerido.</small>
+              <small class="color-danger">
+                <b>Este campo es requerido.</b>
+              </small>
             </v-col>
           </v-row>
         </v-container>
@@ -102,18 +105,24 @@
           >
             Volver
           </v-btn>
-          <br>
           <div v-if="history">
             <h3>Historial de operaciones</h3>
-            <div class="flex flex-column" v-for="(item, index) in history" :key="index">
+            <div
+              class="flex flex-column"
+              v-for="(item, index) in history"
+              :key="index"
+            >
               <div>{{ index+1 }}) Historial de {{ item.user }}</div>
-              <div v-for="(operation, indexOp) in item.operations" :key="indexOp">
-                  {{ operation.expression }} = {{ operation.result }}
+              <div
+                v-for="(operation, indexOp) in item.operations"
+                :key="indexOp"
+              >
+                {{ operation.expression }} = {{ operation.result }}
               </div>
               <br>
             </div>
           </div>
-          <h3 v-else>No hay historial de operaciones </h3>
+          <h3 v-else>No hay historial de operaciones</h3>
         </div>
       </div>
       <div class="teclado buttons" :class="{ hideTeclado: showHistory }">
@@ -123,7 +132,9 @@
         <button class="button" @click="clearAll">
           <v-icon class="clear">mdi-trash-can-outline</v-icon>
         </button>
-        <button class="button">%</button>
+        <button class="button">
+          <v-icon class="clear">mdi-backspace-outline</v-icon>
+        </button>
         <button class="button">/</button><br>
         <button class="button" @click="numberSelected(7)">7</button>
         <button class="button" @click="numberSelected(8)">8</button>
@@ -152,26 +163,20 @@ export default {
     return {
       name: '',
       inputName: true,
-
       operands1: '',
       operands2: '',
       operands3: '',
       operator1: '+',
       operator2: '+',
-
       required: false,
-      errorInput1: false,
-      errorInput2: false,
-
       showResult: false,
       result: '',
-
       history: [],
       showHistory: false,
       historyExist: null,
       madeBy: '',
-
-      clickedInput: null
+      clickedInput: null,
+      sameUser: false
     }
   },
   mounted() {
@@ -181,7 +186,7 @@ export default {
     window.removeEventListener('beforeunload', localStorage.clear())
   },
   methods: {
-    clearName(){
+    clearName() {
       this.inputName = true
       this.showResult = false
       this.name = ''
@@ -189,6 +194,7 @@ export default {
       this.operands1 = ''
       this.operands2 = ''
       this.operands3 = ''
+      this.required = false
     },
     saveName () {
       if (this.name != '') {
@@ -207,107 +213,106 @@ export default {
         this.operands3 += selected
       }
     },
-    operation () {
+
+    operation () { // Funcion que se encarga de hacer las operaciones matematicas e insertar en el historial
+      this.sameUser = false
+      this.madeBy = ''
       if (this.operands1 == '') {
         this.required = true
         this.$nextTick(() => {
-          this.$refs['operands1'].$el.querySelector('#input-7').focus();
-        });
-
+          this.$refs['operands1'].$el.querySelector('#operands1').focus()
+        })
         return false
       }
 
       if (this.operands2 == '') {
         this.required = true
         this.$nextTick(() => {
-          this.$refs['operands2'].$el.querySelector('#input-8').focus();
-        });
-
+          this.$refs['operands2'].$el.querySelector('#operands2').focus()
+        })
         return false
       }
+
+      let expression = ''
 
       if (isNaN(this.operands1) || isNaN(this.operands2) || isNaN(this.operands3)) {
         this.showResult = true
         this.result = this.operands1 + this.operands2 + this.operands3
       } else {
-        let expression = this.operands1 + this.operator1 + this.operands2
+        expression = this.operands1 + this.operator1 + this.operands2
 
-        if (this.operands3 !== '') {
+        if (this.operands3 !== '')
           expression += this.operator2 + this.operands3
-        }
 
         this.result = eval(expression)
         this.showResult = true
-
-        let history = [{
-          user: this.name,
-          operations: [{
-            expression: expression,
-            result: this.result
-          }]
-        }]
-
-        this.historyExist =  JSON.parse(localStorage.getItem('history'))
-        this.historyExist ? this.updateHistory(history) : this.saveHistory(history)
       }
+
+      let history = [{
+        user: this.name,
+        operations: [{
+          expression: XPathExpression,
+          result: this.result
+        }]
+      }]
+
+      this.historyExist =  JSON.parse(localStorage.getItem('history'))
+      this.historyExist ? this.updateHistory(history) : this.saveHistory(history)
     },
-    saveHistory(history) {
+    saveHistory(history) { //funcion que guarda en la memoria
       localStorage.setItem('history', JSON.stringify(history))
     },
-    updateHistory(history) {
-      this.findOperation(...history)
-      this.historyExist.push(...history)
-      localStorage.setItem('history', JSON.stringify(this.historyExist))
-    },
-    findOperation(nuevaOp) {
-      let operaciones = this.historyExist
+    updateHistory(history) { //funcion que actualiza la memoria
+      let currentOp = history[0]
 
-      for (let i = 0; i < operaciones.length; i++) {
-        const user = operaciones[i].user
-        const operacionesUsuario = operaciones[i].operations
+      this.findOperation(currentOp)
 
-        for (let j = 0; j < operacionesUsuario.length; j++) {
-          const expresion = operacionesUsuario[j].expression
-
-          if (expresion === nuevaOp.operations[0].expression) {
-            this.madeBy = `Operación realizada por ${user}`
-            if (user === nuevaOp.user) {
-              this.madeBy = 'Ya realizaste esta operación antes'
-            }
-          }
-        }
+      if (this.sameUser) {
+        this.historyExist[0].operations.push(currentOp.operations[0])
+      } else {
+        this.historyExist.push(currentOp)
       }
+      localStorage.setItem('history', JSON.stringify(this.historyExist))
     },
     getHistory() {
       this.showHistory = true
       this.history = JSON.parse(localStorage.getItem('history'))
+    },
+    findOperation(nuevaOp) { //Funcion que busca si una operacion fue realizada con anterioridad
+      let operaciones = this.historyExist
+
+      for (let i = 0; i < operaciones.length; i++) {
+        const user = operaciones[i].user
+        const opUser = operaciones[i].operations
+
+        if (user === nuevaOp.user) {
+          this.sameUser = true
+        }
+
+        for (let j = 0; j < opUser.length; j++) {
+          const expresion = opUser[j].expression
+
+          if (expresion === nuevaOp.operations[0].expression) {
+            this.madeBy = `Operación hecha anteriormente por ${user}`
+            if (user === nuevaOp.user) {
+              this.madeBy = 'Ya has realizado esta operación antes'
+            }
+          }
+        }
+      }
     },
     clearAll() {
       this.operands1 = ''
       this.operands2 = ''
       this.operands3 = ''
       this.showResult = false
-    },
-    validarInput(e) {
-      var patron = /^[a-zA-Z0-9]*$/; // Expresión regular para permitir solo caracteres alfanuméricos
-
-      if (!patron.test(e)) {
-       //error
-      }
+      this.result = false
     }
   }
 }
 </script>
 
 <style>
-.p-0 {
-  padding: 1px!important;
-}
-
-.welcome {
-  margin-bottom: 10px!important;
-}
-
 #principal{
   width: 100%;
   height: 100%;
@@ -336,10 +341,6 @@ export default {
   transition: height .3s;
 }
 
-.clearName {
-  color: #D32F2F!important;
-}
-
 .pantallaHistory {
   height: 440px;
   width: 288px;
@@ -348,6 +349,7 @@ export default {
 .container-result {
   margin-top: 10px!important;
 }
+
 .teclado{
   background: #3A434F;
 }
@@ -355,9 +357,11 @@ export default {
 .hideTeclado{
   display: none;
 }
+
 .v-btn {
   min-width: 39px!important;
 }
+
 .v-list-item, .v-list-item__subtitle {
   color: #fff!important;
   font-size: 20px!important;
@@ -401,9 +405,11 @@ export default {
   -webkit-transition: all .2s ease-in-out;
   -moz-transition: all .2s ease-in-out;
 }
+
 .button.result{
   width: 144px ;
 }
+
 .button:hover{
   transform: scale(1.1);
   -webkit-transform: scale(1.1);
@@ -412,6 +418,7 @@ export default {
   -moz-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.2);
   -webkit-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.2);
 }
+
 .button:active{
   transform: scale(1);
 }

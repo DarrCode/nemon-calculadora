@@ -19,6 +19,7 @@ export default {
 body{
   background:#E1E1E1;
 }
+
 #app {
   margin-top: 50px;
   font-family: 'Nunito Sans', sans-serif;
@@ -32,4 +33,15 @@ body{
   color: #E53935!important;
 }
 
+.p-0 {
+  padding: 1px!important;
+}
+
+.welcome {
+  margin-bottom: 10px!important;
+}
+
+.btn-back {
+  margin-bottom: 15px;
+}
 </style>
